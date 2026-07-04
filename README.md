@@ -10,7 +10,9 @@ This repository provides an anonymized implementation of **HMCI-Net** for double
 
 ## Highlights
 
-HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It is designed around two observations: common volumetric scanning patterns may disrupt inter-slice voxel continuity, and conventional bottleneck designs often lack explicit cross-directional high-level interaction. HMCI-Net addresses these issues with:
+HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It is designed around two observations: common volumetric scanning patterns may disrupt inter-slice voxel continuity, and conventional bottleneck designs often lack explicit cross-directional high-level interaction.
+
+Core components:
 
 - **Helical Mamba (HM) Layer:** combines tri-directional bidirectional helical Mamba modeling with multi-scale structural modulation.
 - **Alternating Helical Scanning:** serializes volumetric features into forward and reverse helical sequences while preserving cross-slice continuity.
@@ -25,10 +27,10 @@ Let an input CT volume be denoted as:
 ```math
 I \in \mathbb{R}^{1 \times D \times H \times W},
 \quad
-Y \in \{0,1,2\}^{D \times H \times W},
+Y \in \{0,1,2\}^{D \times H \times W}.
 ```
 
-where label `0`, `1`, and `2` correspond to background, liver, and tumor in the LiTS-style setting. The encoder produces hierarchical features:
+Here, labels `0`, `1`, and `2` correspond to background, liver, and tumor in the LiTS-style setting. The encoder produces hierarchical features:
 
 ```math
 X_i \in \mathbb{R}^{C_i \times D_i \times H_i \times W_i},
@@ -51,16 +53,17 @@ The helical scan traverses neighboring slices and in-plane regions in an alterna
 
 ### Multi-scale Structural Feature Modulation
 
-After helical Mamba modeling, MSFM enhances structural details by combining global volumetric responses and local depth-wise convolutional responses. In compact form:
+After helical Mamba modeling, MSFM enhances structural details by combining global volumetric responses and local depth-wise convolutional responses:
 
 ```math
-\hat{X}_i = \operatorname{MSFM}
-\left(
-\operatorname{HM}
-\left(
-\operatorname{LN}(X_i)
-\right)
-\right).
+\hat{X}_i =
+\mathrm{MSFM}
+(
+\mathrm{HM}
+(
+\mathrm{LN}(X_i)
+)
+).
 ```
 
 This design improves the representation of heterogeneous tumor appearances, irregular shapes, and ambiguous boundaries.
@@ -72,24 +75,24 @@ At the bottleneck, CDI performs group-wise directional attention. Given bottlene
 ```math
 A^g =
 \sigma
-\left(
+(
 q_{\mathrm{avg}}^g R_{\mathrm{max}}^g
 +
 q_{\mathrm{max}}^g R_{\mathrm{avg}}^g
-\right),
+).
 ```
 
-where $q_{\mathrm{avg}}^g$ and $q_{\mathrm{max}}^g$ are branch descriptors, and $R_{\mathrm{avg}}^g$ and $R_{\mathrm{max}}^g$ are reshaped spatial responses. The final bottleneck output is:
+Here, $q_{\mathrm{avg}}^g$ and $q_{\mathrm{max}}^g$ are branch descriptors, while $R_{\mathrm{avg}}^g$ and $R_{\mathrm{max}}^g$ are reshaped spatial responses. The final bottleneck output is:
 
 ```math
 F_{\mathrm{CDI}} =
-\operatorname{PWC}
-\left(
-\operatorname{Concat}_{g=1}^{G}
-\left(
+\mathrm{PWC}
+(
+\mathrm{Concat}_{g=1}^{G}
+(
 A^g \odot X_4^g
-\right)
-\right).
+)
+).
 ```
 
 CDI improves lesion-focused localization by allowing smooth contextual cues and salient structural cues to complement each other.
@@ -97,7 +100,7 @@ CDI improves lesion-focused localization by allowing smooth contextual cues and 
 ## Repository Structure
 
 ```text
-HMNet_Anonymous_GitHub/
+GitHub/
 |-- README.md
 |-- requirements.txt
 |-- .gitignore
@@ -289,4 +292,3 @@ The private dataset is not included in this anonymous repository. It will be con
 ## Intended Use
 
 This repository is intended for academic research and reproducibility. It is not a medical product and must not be used for clinical decision-making.
-

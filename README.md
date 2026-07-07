@@ -10,9 +10,15 @@ This repository provides an anonymized implementation of **HMCI-Net** for double
 
 ## Highlights
 
-HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It is designed around two observations: common volumetric scanning patterns may disrupt inter-slice voxel continuity, and conventional bottleneck designs often lack explicit cross-directional high-level interaction.
+HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It is designed around two observations: common volumetric scanning patterns may disrupt inter-slice voxel continuity, and conventional bottleneck designs often lack explicit cross-directional high-level interaction. The manuscript also introduces a large-scale liver tumor dataset to support more comprehensive evaluation of liver tumor and tumor-enhancement segmentation.
 
-Core components:
+**Key Contributions:**
+
+1. **HMCI-Net with continuity-aware Mamba modeling and cross-directional interaction.** We propose HMCI-Net, a 3D segmentation framework built with a **Helical Mamba (HM) Layer**, **Alternating Helical Scanning**, **Multi-scale Structural Feature Modulation (MSFM)**, and a **Cross-Directional Interaction (CDI) Block**. These modules preserve inter-slice continuity, enhance structural details, and strengthen bottleneck-level directional interaction for liver tumor localization.
+2. **A large-scale liver tumor dataset.** We construct **LiTE**, a contrast-enhanced CT dataset for liver tumor analysis. It contains two complementary subsets: **LiT** for whole liver-tumor annotations and **LiE** for tumor-enhancement-region annotations. For anonymous review and data governance reasons, the dataset itself is not redistributed in this repository, but the release notice is provided below.
+3. **Strong segmentation performance.** Extensive experiments show that HMCI-Net achieves accurate and robust liver tumor segmentation, with consistent gains in quantitative comparison, qualitative visualization, statistical significance, complexity analysis, tumor-size stratified evaluation, and ablation studies.
+
+**Core Implementation Components:**
 
 - **Helical Mamba (HM) Layer:** combines tri-directional bidirectional helical Mamba modeling with multi-scale structural modulation.
 - **Alternating Helical Scanning:** serializes volumetric features into forward and reverse helical sequences while preserving cross-slice continuity.
@@ -280,14 +286,14 @@ In the error maps, white indicates true-positive segmentation, red indicates fal
 
 ## Dataset Release Notice
 
-The manuscript introduces **LiTE**, a contrast-enhanced CT dataset for liver tumor and tumor-enhancement segmentation. LiTE contains two subsets:
+The manuscript introduces **LiTE**, a large-scale contrast-enhanced CT dataset for liver tumor and tumor-enhancement segmentation. LiTE is designed to support both lesion-level liver tumor segmentation and enhancement-region analysis. It contains two subsets:
 
 ```text
 LiT: whole liver-tumor annotations
 LiE: tumor-enhancement-region annotations
 ```
 
-The private dataset is not included in this anonymous repository. It will be considered for public release after completion of de-identification, data-use, and governance procedures.
+The dataset is not included in this anonymous repository because the current release is prepared for double-blind review and the data must follow de-identification, data-use, and governance procedures. Public release will be considered after the review period and the required approvals are completed.
 
 ## Intended Use
 

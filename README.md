@@ -30,26 +30,26 @@ HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It
 
 Let an input CT volume be denoted as:
 
-```math
+$$
 I \in \mathbb{R}^{1 \times D \times H \times W},
 \quad
 Y \in \{0,1,2\}^{D \times H \times W}.
-```
+$$
 
 Here, labels `0`, `1`, and `2` correspond to background, liver, and tumor in the LiTS-style setting. The encoder produces hierarchical features:
 
-```math
+$$
 X_i \in \mathbb{R}^{C_i \times D_i \times H_i \times W_i},
 \quad i \in \{0,1,2,3,4\}.
-```
+$$
 
 ### Helical Mamba Layer
 
 Each HM layer first normalizes the input feature and then sends it to a tri-directional helical Mamba block. The feature is scanned along three orthogonal views, and each view contains a forward helical sequence and a reverse helical sequence:
 
-```math
+$$
 \{S_F^a, S_B^a\}, \quad a \in \{D,H,W\}.
-```
+$$
 
 The helical scan traverses neighboring slices and in-plane regions in an alternating manner, reducing direction-dependent bias and improving continuity-aware long-range modeling.
 
@@ -61,7 +61,7 @@ The helical scan traverses neighboring slices and in-plane regions in an alterna
 
 After helical Mamba modeling, MSFM enhances structural details by combining global volumetric responses and local depth-wise convolutional responses:
 
-```math
+$$
 \hat{X}_i =
 \mathrm{MSFM}
 (
@@ -70,7 +70,7 @@ After helical Mamba modeling, MSFM enhances structural details by combining glob
 \mathrm{LN}(X_i)
 )
 ).
-```
+$$
 
 This design improves the representation of heterogeneous tumor appearances, irregular shapes, and ambiguous boundaries.
 
@@ -78,7 +78,7 @@ This design improves the representation of heterogeneous tumor appearances, irre
 
 At the bottleneck, CDI performs group-wise directional attention. Given bottleneck feature $X_4$, channels are divided into $G$ groups. Each group constructs average-pooling and max-pooling branches along the depth, height, and width axes. The two branches then interact through cross-branch spatial weighting:
 
-```math
+$$
 A^g =
 \sigma
 (
@@ -86,11 +86,11 @@ q_{\mathrm{avg}}^g R_{\mathrm{max}}^g
 +
 q_{\mathrm{max}}^g R_{\mathrm{avg}}^g
 ).
-```
+$$
 
 Here, $q_{\mathrm{avg}}^g$ and $q_{\mathrm{max}}^g$ are branch descriptors, while $R_{\mathrm{avg}}^g$ and $R_{\mathrm{max}}^g$ are reshaped spatial responses. The final bottleneck output is:
 
-```math
+$$
 F_{\mathrm{CDI}} =
 \mathrm{PWC}
 (
@@ -99,7 +99,7 @@ F_{\mathrm{CDI}} =
 A^g \odot X_4^g
 )
 ).
-```
+$$
 
 CDI improves lesion-focused localization by allowing smooth contextual cues and salient structural cues to complement each other.
 

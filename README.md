@@ -1,6 +1,6 @@
 # HMCI-Net
 
-**HMCI-Net: Toward Accurate Liver Tumor Segmentation via Helical Mamba and Cross-Directional Interaction**
+**Toward Accurate Liver Tumor Segmentation via Helical Mamba and Cross-Directional Interaction**
 
 > **Venue:** IEEE BIBM 2026  
 > **Status:** Accepted
@@ -31,8 +31,8 @@ HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It
 **Key Contributions:**
 
 1. **HMCI-Net with continuity-aware Mamba modeling and cross-directional interaction.** We propose HMCI-Net, a 3D segmentation framework built with a **Helical Mamba (HM) Layer**, **Alternating Helical Scanning**, **Multi-scale Structural Feature Modulation (MSFM)**, and a **Cross-Directional Interaction (CDI) Block**. These modules preserve inter-slice continuity, enhance structural details, and strengthen bottleneck-level directional interaction for liver tumor localization.
-2. **A large-scale liver tumor dataset.** We construct **LiTE**, a contrast-enhanced CT dataset for liver tumor analysis. It contains two complementary subsets: **LiT** for whole liver-tumor annotations and **LiE** for tumor-enhancement-region annotations. The dataset itself is not redistributed in this repository due to data governance requirements; the release notice is provided below.
-3. **Strong segmentation performance.** Extensive experiments show that HMCI-Net achieves accurate and robust liver tumor segmentation, with consistent gains in quantitative comparison, qualitative visualization, statistical significance, complexity analysis, tumor-size stratified evaluation, and ablation studies.
+2. **A large-scale liver tumor dataset.** We construct **LiTE**, a contrast-enhanced CT dataset for liver tumor analysis. It contains **529 LiT cases** with whole-tumor annotations, including **171 LiE cases** with additional intratumoral enhancement-region annotations. The dataset itself is not redistributed in this repository due to data governance requirements; the release notice is provided below.
+3. **Strong segmentation performance.** Extensive experiments show that HMCI-Net achieves accurate and robust liver tumor segmentation, with consistent gains in quantitative comparison, qualitative visualization, complexity analysis, and ablation studies across LiT, LiE, CECT, LiTS, and MSD08.
 
 **Core Implementation Components:**
 
@@ -75,49 +75,43 @@ The helical scan traverses neighboring slices and in-plane regions in an alterna
 
 ### Multi-scale Structural Feature Modulation
 
-After helical Mamba modeling, MSFM enhances structural details by combining global volumetric responses and local depth-wise convolutional responses:
+After helical Mamba modeling, the feature $\hat{X}_i$ is refined using volumetric and local depthwise convolutions:
 
 $$
-\hat{X}_i =
-\mathrm{MSFM}
-(
-\mathrm{HM}
-(
-\mathrm{LN}(X_i)
-)
-).
+F_v = \mathrm{DWC}_5(\hat{X}_i), \qquad F_l = \mathrm{DWC}_3(\hat{X}_i),
 $$
 
-This design improves the representation of heterogeneous tumor appearances, irregular shapes, and ambiguous boundaries.
+$$
+F_a = \mathrm{Softmax}\left(\mathrm{LN}\left(\frac{\mathrm{GAP}(F_v)+\mathrm{GMP}(F_v)}{2}\right)\right).
+$$
+
+The HM layer output combines channel modulation, local structural features, and residual connections:
+
+$$
+Y_i = X_i + \mathrm{PWC}\left((F_v \odot F_a)\odot F_l + \hat{X}_i\right).
+$$
 
 ### Cross-Directional Interaction Block
 
-At the bottleneck, CDI performs group-wise directional attention. Given bottleneck feature $X_4$, channels are divided into $G$ groups. Each group constructs average-pooling and max-pooling branches along the depth, height, and width axes. The two branches then interact through cross-branch spatial weighting:
+At the bottleneck, CDI divides the channels of $X_4$ into $G$ groups. Average- and max-pooling branches construct directional gates along the depth, height, and width axes. The directionally weighted features $\tilde{F}_{\mathrm{avg}}^g$ and $\tilde{F}_{\mathrm{max}}^g$ then interact through cross-branch spatial weighting:
 
 $$
-A^g =
-\sigma
-(
-q_{\mathrm{avg}}^g R_{\mathrm{max}}^g
-+
-q_{\mathrm{max}}^g R_{\mathrm{avg}}^g
-).
+q_{\mathrm{avg}}^g = \mathrm{Softmax}(\mathrm{GAP}(\tilde{F}_{\mathrm{avg}}^g)), \qquad
+q_{\mathrm{max}}^g = \mathrm{Softmax}(\mathrm{GMP}(\tilde{F}_{\mathrm{max}}^g)),
 $$
 
-Here, $q_{\mathrm{avg}}^g$ and $q_{\mathrm{max}}^g$ are branch descriptors, while $R_{\mathrm{avg}}^g$ and $R_{\mathrm{max}}^g$ are reshaped spatial responses. The final bottleneck output is:
-
 $$
-F_{\mathrm{CDI}} =
-\mathrm{PWC}
-(
-\mathrm{Concat}_{g=1}^{G}
-(
-A^g \odot X_4^g
-)
-).
+A^g = q_{\mathrm{avg}}^g \otimes \tilde{F}_{\mathrm{max}}^g
+    + q_{\mathrm{max}}^g \otimes \tilde{F}_{\mathrm{avg}}^g,
 $$
 
-CDI improves lesion-focused localization by allowing smooth contextual cues and salient structural cues to complement each other.
+where $\otimes$ denotes matrix multiplication with spatially flattened features. The final output merges the grouped features after sigmoid spatial weighting:
+
+$$
+F_{\mathrm{CDI}} = \mathrm{PWC}\left(\mathrm{R}\left(X_g \odot \sigma(A^g)\right)\right).
+$$
+
+Here, $\mathrm{R}$ restores the original batch and channel dimensions. CDI strengthens lesion-aware localization by combining directional gating with average-max branch interaction.
 
 ## Repository Structure
 
@@ -131,9 +125,7 @@ GitHub/
 |   |-- helical_scanning.png
 |   |-- quantitative_results.png
 |   |-- qualitative_results.png
-|   |-- significance_table.png
 |   |-- complexity_table.png
-|   |-- tumor_size_table.png
 |   |-- ablation_components.png
 |   `-- ablation_design.png
 `-- Code/
@@ -221,7 +213,7 @@ python 1_Train_LITS_main.py \
   --img_size 128 128 128 \
   --batch_size 1 \
   --crop_sample 2 \
-  --max_iter 70000 \
+  --max_iter 50000 \
   --eval_step 200 \
   --gpu 0
 ```
@@ -233,7 +225,7 @@ Key arguments:
 | `--root` | Dataset root containing `imagesTr`, `labelsTr`, `imagesVal`, and `labelsVal`. |
 | `--dataset` | Use `Task03_Liver` for LiTS-style liver/tumor segmentation. |
 | `--network` | Use `HM` to train HMCI-Net. |
-| `--output_parameter` | Path where the best checkpoint is saved. |
+| `--output_parameter` | Checkpoint output path. For paper reproduction, evaluate the weights from the final training iteration. |
 | `--img_size` | 3D ROI size. The example uses `128 128 128`. |
 | `--crop_sample` | Number of foreground/background cropped sub-volumes sampled per case. |
 
@@ -254,11 +246,29 @@ python Reference_LITS.py \
 
 Predictions and case-level outputs are saved under `outputs/`.
 
+## Paper Reproduction Settings
+
+The final paper uses the following settings for all compared models:
+
+- Patient-level training/test split: **4:1**, with test sets reserved for evaluation.
+- Liver-region cropping: a pretrained nnU-Net liver model is used only to obtain bounding boxes.
+- Input patch size: **128 x 128 x 128**; batch size: **1**.
+- Optimizer: **AdamW**; initial learning rate: **3e-4**.
+- Training duration: **50,000 iterations**; evaluation uses the **final-iteration weights**.
+- Loss: **DiceCE**.
+- Inference: sliding-window prediction with **0.5 overlap**.
+- Metrics: **Dice (%)** and **HD95 (mm)**, evaluated on tumor annotations.
+- Hardware reported in the paper: a single **NVIDIA RTX 3090** GPU.
+
+For paper reproduction, ensure that the checkpoint used for inference contains the final-iteration weights and that the data split and inference settings match those above.
+
 ## Results Preview
 
-The figures below summarize the experimental results reported in our paper.
+The figures and four tables below are extracted from the final paper.
 
-### Quantitative Comparison
+### Quantitative Comparison (Table I)
+
+HMCI-Net achieves an average **Dice of 65.12%** and **HD95 of 47.23 mm** across LiT, LiE, CECT, LiTS, and MSD08. On LiTS, it achieves **65.32% Dice** and **23.90 mm HD95**.
 
 <p align="center">
   <img src="assets/quantitative_results.png" width="900" alt="Quantitative comparison">
@@ -272,29 +282,25 @@ In the error maps, white indicates true-positive segmentation, red indicates fal
   <img src="assets/qualitative_results.png" width="900" alt="Qualitative results">
 </p>
 
-### Statistical Significance
+### Complexity Analysis (Table II)
 
-<p align="center">
-  <img src="assets/significance_table.png" width="620" alt="Statistical significance">
-</p>
-
-### Complexity Analysis
+For a single `128 x 128 x 128` input patch with batch size 1, HMCI-Net uses **31.87M parameters**, **1480.47 GFLOPs**, **3.11 GB GPU memory**, and **0.24 s per patch**.
 
 <p align="center">
   <img src="assets/complexity_table.png" width="620" alt="Complexity analysis">
 </p>
 
-### Tumor-Size Stratified Analysis
+### Component Ablation (Table III)
 
-<p align="center">
-  <img src="assets/tumor_size_table.png" width="620" alt="Tumor-size stratified comparison">
-</p>
-
-### Ablation Study
+The progressive ablation on CECT and LiTS evaluates HM, MSFM, and CDI. The full model achieves an average **63.61% Dice** and **42.34 mm HD95** across these two datasets.
 
 <p align="center">
   <img src="assets/ablation_components.png" width="620" alt="Component ablation">
 </p>
+
+### Additional Ablation (Table IV)
+
+The LiTS analysis compares encoder modeling strategies, scanning strategies, and interaction designs. The single-helical variant uses one spiral traversal; the complete model uses bidirectional helical scanning.
 
 <p align="center">
   <img src="assets/ablation_design.png" width="620" alt="Design ablation">
@@ -302,11 +308,11 @@ In the error maps, white indicates true-positive segmentation, red indicates fal
 
 ## Dataset Release Notice
 
-The manuscript introduces **LiTE**, a large-scale contrast-enhanced CT dataset for liver tumor and tumor-enhancement segmentation. LiTE is designed to support both lesion-level liver tumor segmentation and enhancement-region analysis. It contains two subsets:
+The paper introduces **LiTE**, an arterial-phase contrast-enhanced CT dataset collected from three medical centers between 2022 and 2025 for liver tumor and tumor-enhancement segmentation. LiTE is designed to support both lesion-level liver tumor segmentation and enhancement-region analysis. It contains two subsets:
 
 ```text
-LiT: whole liver-tumor annotations
-LiE: tumor-enhancement-region annotations
+LiT: 529 cases with whole-tumor annotations
+LiE: 171 cases within LiT with additional intratumoral enhancement masks
 ```
 
 The dataset is not included in this repository. Any public release is subject to completion of the required de-identification, data-use, and governance procedures and approvals. Release details will be announced here when available.
@@ -317,7 +323,7 @@ This repository is intended for academic research and reproducibility. It is not
 
 ## Citation
 
-If you use this code in your research, please cite our paper, **HMCI-Net: Toward Accurate Liver Tumor Segmentation via Helical Mamba and Cross-Directional Interaction**, accepted at **IEEE BIBM 2026**. Full citation details and BibTeX will be added when the official proceedings are available.
+If you use this code in your research, please cite our paper, **Toward Accurate Liver Tumor Segmentation via Helical Mamba and Cross-Directional Interaction**, accepted at **IEEE BIBM 2026**. Full citation details and BibTeX will be added when the official proceedings are available.
 
 ## Acknowledgements
 

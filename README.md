@@ -2,7 +2,23 @@
 
 **HMCI-Net: Toward Accurate Liver Tumor Segmentation via Helical Mamba and Cross-Directional Interaction**
 
-This repository provides an anonymized implementation of **HMCI-Net** for double-blind review. The release contains the core network code, a LiTS training/evaluation example, and manuscript figures.
+> **Venue:** IEEE BIBM 2026  
+> **Status:** Accepted
+
+<div>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white" alt="Python"></a>
+  <a href="https://pytorch.org/"><img src="https://img.shields.io/badge/PyTorch-Framework-EE4C2C?logo=pytorch&logoColor=white" alt="PyTorch"></a>
+  <img src="https://img.shields.io/badge/Task-3D%20Liver%20Tumor%20Segmentation-green" alt="Task">
+  <img src="https://img.shields.io/badge/IEEE%20BIBM%202026-Accepted-brightgreen" alt="Accepted at IEEE BIBM 2026">
+</div>
+
+## News
+
+- **2026:** Our paper has been accepted at **IEEE BIBM 2026**!
+
+## Overview
+
+This repository provides the PyTorch implementation of **HMCI-Net**. The release contains the core network code, a LiTS training/evaluation example, and manuscript figures.
 
 <p align="center">
   <img src="assets/architecture.png" width="900" alt="HMCI-Net architecture">
@@ -15,7 +31,7 @@ HMCI-Net is a 3D liver tumor segmentation framework for contrast-enhanced CT. It
 **Key Contributions:**
 
 1. **HMCI-Net with continuity-aware Mamba modeling and cross-directional interaction.** We propose HMCI-Net, a 3D segmentation framework built with a **Helical Mamba (HM) Layer**, **Alternating Helical Scanning**, **Multi-scale Structural Feature Modulation (MSFM)**, and a **Cross-Directional Interaction (CDI) Block**. These modules preserve inter-slice continuity, enhance structural details, and strengthen bottleneck-level directional interaction for liver tumor localization.
-2. **A large-scale liver tumor dataset.** We construct **LiTE**, a contrast-enhanced CT dataset for liver tumor analysis. It contains two complementary subsets: **LiT** for whole liver-tumor annotations and **LiE** for tumor-enhancement-region annotations. For anonymous review and data governance reasons, the dataset itself is not redistributed in this repository, but the release notice is provided below.
+2. **A large-scale liver tumor dataset.** We construct **LiTE**, a contrast-enhanced CT dataset for liver tumor analysis. It contains two complementary subsets: **LiT** for whole liver-tumor annotations and **LiE** for tumor-enhancement-region annotations. The dataset itself is not redistributed in this repository due to data governance requirements; the release notice is provided below.
 3. **Strong segmentation performance.** Extensive experiments show that HMCI-Net achieves accurate and robust liver tumor segmentation, with consistent gains in quantitative comparison, qualitative visualization, statistical significance, complexity analysis, tumor-size stratified evaluation, and ablation studies.
 
 **Core Implementation Components:**
@@ -149,7 +165,7 @@ pip install -r requirements.txt
 
 ## Dataset Preparation
 
-This anonymized release uses **LiTS** as the public-dataset example. Please download LiTS from the official source and convert images and labels to NIfTI format if needed.
+This release uses **LiTS** as the public-dataset example. Please download LiTS from the official source and convert images and labels to NIfTI format if needed.
 
 Arrange the processed data as:
 
@@ -240,7 +256,7 @@ Predictions and case-level outputs are saved under `outputs/`.
 
 ## Results Preview
 
-The figures below are provided for anonymous review visualization only.
+The figures below summarize the experimental results reported in our paper.
 
 ### Quantitative Comparison
 
@@ -293,8 +309,16 @@ LiT: whole liver-tumor annotations
 LiE: tumor-enhancement-region annotations
 ```
 
-The dataset is not included in this anonymous repository because the current release is prepared for double-blind review and the data must follow de-identification, data-use, and governance procedures. Public release will be considered after the review period and the required approvals are completed.
+The dataset is not included in this repository. Any public release is subject to completion of the required de-identification, data-use, and governance procedures and approvals. Release details will be announced here when available.
 
 ## Intended Use
 
 This repository is intended for academic research and reproducibility. It is not a medical product and must not be used for clinical decision-making.
+
+## Citation
+
+If you use this code in your research, please cite our paper, **HMCI-Net: Toward Accurate Liver Tumor Segmentation via Helical Mamba and Cross-Directional Interaction**, accepted at **IEEE BIBM 2026**. Full citation details and BibTeX will be added when the official proceedings are available.
+
+## Acknowledgements
+
+We thank the developers and contributors of PyTorch, MONAI, and Mamba for making their open-source tools available to the research community. We also thank the LiTS dataset organizers for providing a public benchmark for liver and liver tumor segmentation.
